@@ -10,13 +10,26 @@ use serde::{
 #[serde(rename_all = "camelCase")]
 pub struct SyncInfo {
     /// The block at which import began.
-    pub starting_block: U256,
+    pub starting_block: Option<U256>,
 
     /// The highest currently synced block.
     pub current_block: U256,
 
     /// The estimated highest block.
     pub highest_block: U256,
+
+    /// The sync stages.
+    pub stages: Option<Vec<SyncStageInfo>>,
+}
+
+/// Information about current blockchain syncing operations.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct SyncStageInfo {
+    /// The block at which import began.
+    pub stage_name: String,
+
+    /// The highest currently synced block.
+    pub block_number: U256,
 }
 
 /// The current state of blockchain syncing operations.
@@ -46,9 +59,10 @@ struct SubscriptionSyncInfo {
 impl From<SubscriptionSyncInfo> for SyncInfo {
     fn from(s: SubscriptionSyncInfo) -> Self {
         Self {
-            starting_block: s.starting_block,
+            starting_block: Some(s.starting_block),
             current_block: s.current_block,
             highest_block: s.highest_block,
+            stages: None
         }
     }
 }
@@ -127,9 +141,10 @@ mod tests {
         assert_eq!(
             value,
             SyncState::Syncing(SyncInfo {
-                starting_block: 0x0.into(),
+                starting_block: Some(0x0.into()),
                 current_block: 0x42.into(),
-                highest_block: 0x9001.into()
+                highest_block: 0x9001.into(),
+                stages: None
             })
         );
     }
@@ -152,9 +167,10 @@ mod tests {
         assert_eq!(
             value,
             SyncState::Syncing(SyncInfo {
-                starting_block: 0x0.into(),
+                starting_block: Some(0x0.into()),
                 current_block: 0x42.into(),
-                highest_block: 0x9001.into()
+                highest_block: 0x9001.into(),
+                stages: None
             })
         );
     }
